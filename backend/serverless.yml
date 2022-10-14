@@ -25,8 +25,8 @@ provider:
   # ${self:provider.environment.ATTACHMENT_S3_BUCKET}
   environment:
     PROJECT_NAME: app-serverless
-    TODOS_TABLE: app-serverless-${self:provider.stage}
-    S3_BUCKET_NAME: app-serverless-${self:provider.stage}
+    TODOS_TABLE: todo-serverless-app-${self:provider.stage}
+    S3_BUCKET_NAME: todo-serverless-app-${self:provider.stage}
 
 custom:
   documentation:
