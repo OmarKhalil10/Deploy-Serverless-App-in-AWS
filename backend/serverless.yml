@@ -1,7 +1,6 @@
-# TODO: Change the name of the org 
 org: omarkhalil
-app: serverless-app
-service: serverless-app
+app: serverless-app-todo
+service: serverless-app-todo
 
 plugins:
   - serverless-webpack
@@ -12,21 +11,18 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
-# lambdaHashingVersion: '20201221'
-  stage: ${opt:stage, 'prod'}
+  stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
-
-# Tracing
-  tracing:
+  
+#  X-Ray Tracing
+  tracing: 
     lambda: true
     apiGateway: true
 
-  # Use these variables in the functions and resouorces section below. For example, 
-  # ${self:provider.environment.ATTACHMENT_S3_BUCKET}
   environment:
     PROJECT_NAME: app-serverless
-    TODOS_TABLE: todo-serverless-app-${self:provider.stage}
-    S3_BUCKET_NAME: todo-serverless-app-${self:provider.stage}
+    TODOS_TABLE: app-serverless-${self:provider.stage}
+    S3_BUCKET_NAME: app-serverless-${self:provider.stage}
 
 custom:
   documentation:
@@ -63,6 +59,7 @@ custom:
               type: string
             done:
               type: boolean
+          
 
 functions:
 
@@ -70,7 +67,6 @@ functions:
     handler: src/lambda/auth/auth0Authorizer.handler
 
   # TODO: Configure this function
-  # Get Todo for function configuration
   GetTodos:
     handler: src/lambda/http/getTodos.handler
     events:
@@ -90,8 +86,9 @@ functions:
           - xray:PutTraceSegments
         Resource: 
           - '*'
+
   # TODO: Configure this function
-  # Create Todo for function configuration
+ 
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
     events:
@@ -119,7 +116,6 @@ functions:
           - '*'
 
   # TODO: Configure this function
-  # Update Todo for function configuration
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
     events:
@@ -146,8 +142,7 @@ functions:
         Resource: 
           - '*'
 
-  # TODO: Configure this function
-  # DELETE Todo for function configuration
+  # DELETE: Configure this function
   DeleteTodo:
     handler: src/lambda/http/deleteTodo.handler
     events:
@@ -168,8 +163,7 @@ functions:
         Resource: 
           - '*'
 
-  # TODO: Configure this function
-  # GenerateUploadUrl for function configuration
+  # POST: Configure this function
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
     events:
@@ -188,32 +182,7 @@ functions:
 
 resources:
   Resources:
-    # Add necessary AWS resources. You will need at least the following AWS resources
-    # TODO: Fill the properties
-    # Feel free to change the names as you like. 
-    GatewayResponseDefault4XX:
-      Type: AWS::ApiGateway::GatewayResponse
-      Properties:
-        ResponseParameters:
-          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-          gatewayresponse.header.Access-Control-Allow-Methods: "'*'"
-        ResponseType: DEFAULT_4XX
-        RestApiId:
-          Ref: ApiGatewayRestApi
-
-    GatewayResponseDefault5XX:
-      Type: AWS::ApiGateway::GatewayResponse
-      Properties:
-        ResponseParameters:
-          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,DELETE,PATCH,PUT'"
-        ResponseType: DEFAULT_5XX
-        RestApiId:
-          Ref: ApiGatewayRestApi 
-
-    # TODO: Create a DynamoDB table with local secondary index and a composite key
+    # TODO: Add any necessary AWS resources
     TodosTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -237,9 +206,6 @@ resources:
           Ref: ApiGatewayRestApi
         ValidateRequestBody: true
         ValidateRequestParameters: false
-
-    # TODO: Complete the bucket properties below. 
-    # AttachmentsBucket property
     AttachmentsBucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -257,7 +223,7 @@ resources:
                 - DELETE
                 - HEAD
               MaxAge: 300
-    # RequestBodyValidator property
+
     RequestBodyValidator:
       Type: AWS::ApiGateway::RequestValidator
       Properties:
@@ -267,8 +233,28 @@ resources:
         ValidateRequestBody: true
         ValidateRequestParameters: false
 
-    # TODO: Complete the policy below and attach it to the bucket defined above
-    # For cross referencing the name of the bucket, use "!Ref AttachmentsBucket"
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+
+    GatewayResponseDefault5XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,DELETE,PATCH,PUT'"
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: ApiGatewayRestApi 
+
     BucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
