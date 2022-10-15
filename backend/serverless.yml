@@ -1,6 +1,6 @@
 org: omarkhalil
-app: serverless-app-todo
-service: serverless-app-todo
+app: serverless-todo
+service: serverless-todo
 
 plugins:
   - serverless-webpack
@@ -12,7 +12,7 @@ provider:
   name: aws
   runtime: nodejs12.x
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
+  region: ${opt:region, 'us-east-2'}
   
 #  X-Ray Tracing
   tracing: 
@@ -20,9 +20,9 @@ provider:
     apiGateway: true
 
   environment:
-    PROJECT_NAME: app-serverless
-    TODOS_TABLE: app-serverless-${self:provider.stage}
-    S3_BUCKET_NAME: app-serverless-${self:provider.stage}
+    PROJECT_NAME: serverless-todo
+    TODOS_TABLE: todo-serverless-${self:provider.stage}
+    S3_BUCKET_NAME: todo-serverless-${self:provider.stage}
 
 custom:
   documentation:
